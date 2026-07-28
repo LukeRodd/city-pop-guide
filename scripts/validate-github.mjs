@@ -1,7 +1,10 @@
 import { readFile, stat } from "node:fs/promises";
-import { resolve } from "node:path";
+import { dirname, resolve } from "node:path";
+import { fileURLToPath } from "node:url";
 
-const root = resolve(import.meta.dirname, "..");
+const currentFile = fileURLToPath(import.meta.url);
+const currentDirectory = dirname(currentFile);
+const root = resolve(currentDirectory, "..");
 const requiredFiles = [
   ".github/workflows/ci.yml",
   ".github/workflows/deploy.yml",
