@@ -1,6 +1,6 @@
-# City Pop — guia essencial
+# City Pop — Shibuya night guide
 
-Site estático bilíngue, sem frameworks ou dependências de runtime. A base foi organizada para ser legível em desenvolvimento, gerar artefatos versionados e operar com uma política de segurança restritiva.
+Site estático bilíngue, sem frameworks ou dependências de runtime. A direção visual combina city pop com referências abstratas de Shibuya: cruzamento diagonal, sinalização vertical, códigos de estação, letreiros em camadas e luz noturna controlada.
 
 ## Arquitetura
 
@@ -14,7 +14,8 @@ infra/cloudformation.yml   S3 privado + CloudFront OAC
 scripts/build.mjs          build com hash de conteúdo
 scripts/validate.mjs       validações de segurança e integridade
 scripts/serve.mjs          servidor local com cabeçalhos de segurança
-scripts/deploy.sh          build, infraestrutura e publicação
+scripts/deploy.sh          deploy local básico
+scripts/deploy-auto.sh     validação, build, publicação e smoke test
 dist/                      saída gerada; não deve ser editada
 ```
 
@@ -62,13 +63,31 @@ npm run build
 
 O build recria `dist/` e adiciona um hash SHA-256 curto ao nome de CSS, JavaScript e imagens. Isso permite cache imutável para assets sem manter versões antigas com o mesmo nome.
 
-## Deploy seguro na AWS
+## Deploy automático na AWS
+
+O script principal valida Node.js e AWS CLI, executa todos os testes, gera o
+build, atualiza a stack, sincroniza o S3, invalida o CloudFront, confirma o
+`index.html` e realiza um smoke test HTTP:
 
 ```bash
 AWS_REGION=sa-east-1 \
 STACK_NAME=city-pop-guide \
 PROJECT_NAME=city-pop-guide \
-./scripts/deploy.sh
+./scripts/deploy-auto.sh
+```
+
+Também pode ser executado por npm:
+
+```bash
+npm run deploy:auto
+```
+
+Opções úteis:
+
+```bash
+./scripts/deploy-auto.sh --dry-run
+./scripts/deploy-auto.sh --skip-infra
+./scripts/deploy-auto.sh --skip-infra --no-wait --no-smoke-test
 ```
 
 A infraestrutura padrão cria:
@@ -140,7 +159,7 @@ Também é possível executar os comandos Git manualmente.
 AWS_REGION="sa-east-1" \
 STACK_NAME="city-pop-guide" \
 PROJECT_NAME="city-pop-guide" \
-./scripts/deploy.sh
+./scripts/deploy-auto.sh
 ```
 
 Essa etapa cria o S3 privado e o CloudFront.
@@ -156,12 +175,12 @@ scripts/bootstrap-github.sh OWNER REPOSITORY
 
 O script lê o bucket e a distribuição da stack, cria uma role limitada e,
 quando o GitHub CLI está autenticado, detecta o subject OIDC imutável e configura
-automaticamente as quatro variáveis e o environment `production`.
+automaticamente as variáveis do repositório e o environment `production`.
 
 Repositórios que usam o `sub` OIDC imutável devem informar o valor exato:
 
 ```bash
-GITHUB_OIDC_SUBJECT="repo:OWNER@ORG_ID/REPOSITORY@REPO_ID:ref:refs/heads/main" \
+GITHUB_OIDC_SUBJECT="repo:OWNER@ORG_ID/REPOSITORY@REPO_ID:environment:production" \
 scripts/bootstrap-github.sh OWNER REPOSITORY
 ```
 
@@ -183,7 +202,11 @@ AWS_REGION
 AWS_ROLE_ARN
 SITE_BUCKET_NAME
 CLOUDFRONT_DISTRIBUTION_ID
+SITE_URL
 ```
+
+`SITE_URL` é usada pelo smoke test do workflow. As quatro primeiras variáveis
+são obrigatórias; a URL pode ser configurada pelo `bootstrap-github.sh`.
 
 Esses valores não são credenciais secretas. A autenticação acontece com tokens
 temporários emitidos por OIDC.
@@ -201,8 +224,36 @@ Settings → Environments → production
 ### 7. Fluxos incluídos
 
 - `CI`: valida branches e pull requests.
-- `Deploy production`: publica automaticamente cada push em `main`.
+- `Deploy production`: chama `scripts/deploy-auto.sh` a cada push em `main`.
 - `Dependabot`: acompanha atualizações das GitHub Actions.
 
 O workflow de deploy não recebe permissão para criar usuários, chaves ou alterar
 a infraestrutura. Ele pode apenas sincronizar o bucket e invalidar a distribuição.
+
+## Direção visual inspirada em Shibuya
+
+O layout não usa uma fotografia como fundo. A referência aparece na própria
+composição:
+
+- faixas diagonais que remetem ao *scramble crossing*;
+- placas verticais e códigos como `JY20`;
+- mistura de serifas editoriais com texto monoespaçado;
+- módulos densos cercados por áreas de respiro;
+- ciano, rosa, violeta e amarelo usados como sinais, não como decoração contínua;
+- ticker e pequenos movimentos desativados por `prefers-reduced-motion`.
+
+As referências visuais citadas no rodapé apontam para materiais sobre
+sinalização japonesa e o projeto tipográfico `Shibuya08-09`.
+
+## Animações reversíveis na rolagem
+
+Os elementos marcados com `data-reveal` permanecem registrados no
+`IntersectionObserver`. Ao descer, entram de baixo para cima; ao subir, entram
+de cima para baixo. A preferência `prefers-reduced-motion` continua sendo
+respeitada.
+
+Validação específica:
+
+```bash
+npm run test:reveal
+```

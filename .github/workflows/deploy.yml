@@ -6,9 +6,7 @@ on:
       - main
     paths:
       - "src/**"
-      - "scripts/build.mjs"
-      - "scripts/validate.mjs"
-      - "scripts/test-theme.mjs"
+      - "scripts/**"
       - "package.json"
       - ".github/workflows/deploy.yml"
   workflow_dispatch:
@@ -26,6 +24,7 @@ env:
   AWS_ROLE_ARN: ${{ vars.AWS_ROLE_ARN }}
   SITE_BUCKET_NAME: ${{ vars.SITE_BUCKET_NAME }}
   CLOUDFRONT_DISTRIBUTION_ID: ${{ vars.CLOUDFRONT_DISTRIBUTION_ID }}
+  SITE_URL: ${{ vars.SITE_URL }}
 
 jobs:
   deploy:
@@ -55,9 +54,6 @@ jobs:
           node-version: "20"
           package-manager-cache: false
 
-      - name: Validate and build
-        run: npm run check
-
       - name: Configure temporary AWS credentials
         uses: aws-actions/configure-aws-credentials@v6.2.3
         with:
@@ -67,48 +63,16 @@ jobs:
           mask-aws-account-id: true
           unset-current-credentials: true
 
-      - name: Verify AWS identity
-        run: aws sts get-caller-identity
-
-      - name: Upload HTML and metadata
+      - name: Build, publish and verify
         shell: bash
-        run: |
-          set -Eeuo pipefail
-
-          aws s3 sync dist "s3://${SITE_BUCKET_NAME}" \
-            --delete \
-            --exclude "assets/*" \
-            --cache-control "no-cache,no-store,must-revalidate" \
-            --only-show-errors
-
-      - name: Upload immutable assets
-        shell: bash
-        run: |
-          set -Eeuo pipefail
-
-          aws s3 sync dist/assets "s3://${SITE_BUCKET_NAME}/assets" \
-            --delete \
-            --cache-control "public,max-age=31536000,immutable" \
-            --only-show-errors
-
-      - name: Invalidate CloudFront
-        shell: bash
-        run: |
-          set -Eeuo pipefail
-
-          INVALIDATION_ID="$(
-            aws cloudfront create-invalidation \
-              --distribution-id "${CLOUDFRONT_DISTRIBUTION_ID}" \
-              --paths "/*" \
-              --query "Invalidation.Id" \
-              --output text
-          )"
-
-          aws cloudfront wait invalidation-completed \
-            --distribution-id "${CLOUDFRONT_DISTRIBUTION_ID}" \
-            --id "${INVALIDATION_ID}"
+        env:
+          SKIP_INFRA: "1"
+          WAIT_INVALIDATION: "1"
+          SMOKE_TEST: "1"
+        run: ./scripts/deploy-auto.sh
 
       - name: Deployment summary
+        if: always()
         shell: bash
         run: |
           {
@@ -118,4 +82,7 @@ jobs:
             echo "- Bucket: \`${SITE_BUCKET_NAME}\`"
             echo "- Distribution: \`${CLOUDFRONT_DISTRIBUTION_ID}\`"
             echo "- Region: \`${AWS_REGION}\`"
+            if [[ -n "${SITE_URL}" ]]; then
+              echo "- URL: ${SITE_URL}"
+            fi
           } >> "${GITHUB_STEP_SUMMARY}"

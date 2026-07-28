@@ -110,27 +110,79 @@ function initialiseReveal() {
     return;
   }
 
+  let previousScrollY = window.scrollY;
+  let scrollDirection = "down";
+
+  window.addEventListener(
+    "scroll",
+    () => {
+      const currentScrollY = window.scrollY;
+
+      if (currentScrollY !== previousScrollY) {
+        scrollDirection = currentScrollY > previousScrollY ? "down" : "up";
+        previousScrollY = currentScrollY;
+      }
+    },
+    { passive: true },
+  );
+
+  function setPending(target, direction) {
+    target.classList.remove(
+      "reveal-visible",
+      "reveal-from-top",
+      "reveal-from-bottom",
+    );
+    target.classList.add(
+      "reveal-pending",
+      direction === "top" ? "reveal-from-top" : "reveal-from-bottom",
+    );
+  }
+
+  function setVisible(target) {
+    target.classList.remove("reveal-pending");
+    target.classList.add("reveal-visible");
+  }
+
   const observer = new IntersectionObserver(
     (entries) => {
       entries.forEach((entry) => {
-        if (!entry.isIntersecting) return;
-        entry.target.classList.remove("reveal-pending");
-        entry.target.classList.add("reveal-visible");
-        observer.unobserve(entry.target);
+        if (entry.isIntersecting) {
+          setVisible(entry.target);
+          return;
+        }
+
+        const rootTop = entry.rootBounds?.top ?? 0;
+        const rootBottom = entry.rootBounds?.bottom ?? window.innerHeight;
+        const exitedAbove = entry.boundingClientRect.bottom <= rootTop;
+        const exitedBelow = entry.boundingClientRect.top >= rootBottom;
+
+        if (exitedAbove) {
+          setPending(entry.target, "top");
+        } else if (exitedBelow) {
+          setPending(entry.target, "bottom");
+        } else {
+          setPending(entry.target, scrollDirection === "down" ? "top" : "bottom");
+        }
       });
     },
-    { threshold: 0.08, rootMargin: "0px 0px -5% 0px" },
+    {
+      threshold: 0.12,
+      rootMargin: "-4% 0px -4% 0px",
+    },
   );
 
   targets.forEach((target) => {
-    const isBelowFold = target.getBoundingClientRect().top > innerHeight * 0.9;
+    const bounds = target.getBoundingClientRect();
 
-    if (isBelowFold) {
-      target.classList.add("reveal-pending");
-      observer.observe(target);
+    if (bounds.bottom <= 0) {
+      setPending(target, "top");
+    } else if (bounds.top >= window.innerHeight) {
+      setPending(target, "bottom");
     } else {
-      target.classList.add("reveal-visible");
+      setVisible(target);
     }
+
+    observer.observe(target);
   });
 }
 

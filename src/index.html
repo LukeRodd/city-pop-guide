@@ -3,11 +3,11 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <meta name="description" content="Um guia bilíngue e minimalista para conhecer city pop, discos essenciais e o papel do neon em sua imagem contemporânea.">
+  <meta name="description" content="Um guia bilíngue de city pop com direção visual inspirada na sinalização, no cruzamento e na energia noturna de Shibuya.">
   <meta name="robots" content="index,follow">
   <meta id="theme-color" name="theme-color" content="#f7f4ec">
   <meta name="color-scheme" content="light dark">
-  <title>City Pop — guia essencial</title>
+  <title>City Pop — Shibuya night guide</title>
 
   <script src="assets/js/theme-init.js"></script>
   <link rel="icon" href="assets/images/favicon.svg" type="image/svg+xml">
@@ -26,7 +26,7 @@
 
     <nav class="primary-nav" data-i18n-aria-label="mainNavLabel" aria-label="Navegação principal">
       <a href="#entenda" data-i18n="navIntro">Entenda</a>
-      <a href="#neon" data-i18n="navNeon">Neon</a>
+      <a href="#shibuya" data-i18n="navShibuya">Shibuya</a>
       <a href="#escuta" data-i18n="navListen">Como ouvir</a>
       <a href="#artistas" data-i18n="navArtists">Artistas</a>
       <a href="#rota" data-i18n="navRoute">Rota inicial</a>
@@ -55,8 +55,14 @@
   <main id="conteudo">
     <section id="inicio" class="hero" aria-labelledby="hero-title">
       <div class="hero__sun" aria-hidden="true"></div>
+      <div class="hero__crossing" aria-hidden="true"><span></span><span></span><span></span><span></span><span></span><span></span></div>
       <div class="hero__rail" aria-hidden="true"><span>01</span><i></i><span>06</span></div>
-      <div class="hero__stamp" aria-hidden="true"><strong>NIGHT</strong><small><span lang="ja">東京</span> · FM 82.4</small></div>
+      <div class="hero__stamp" aria-hidden="true"><strong>SHIBUYA</strong><small><span lang="ja">渋谷</span> · JY20</small></div>
+      <div class="hero__sign-stack" aria-hidden="true">
+        <span class="city-sign city-sign--station"><b lang="ja">渋谷</b><small>SHIBUYA / JY20</small></span>
+        <span class="city-sign city-sign--pink"><b lang="ja">センター街</b><small>CENTER-GAI</small></span>
+        <span class="city-sign city-sign--route"><b>246</b><small>TOKYO ROUTE</small></span>
+      </div>
 
       <div class="hero__copy">
         <p class="eyebrow" data-i18n="heroEyebrow">Japão · décadas de 1970 e 1980</p>
@@ -73,6 +79,10 @@
       <div class="hero__meta">
         <p><span data-i18n="heroLabel">Comece pelo ritmo</span><b>Funk · Boogie · R&amp;B</b></p>
         <a href="#entenda"><span data-i18n="begin">Entrar</span><span aria-hidden="true">↓</span></a>
+      </div>
+
+      <div class="city-ticker" aria-hidden="true">
+        <div>SHIBUYA SCRAMBLE · CITY POP GUIDE · 渋谷 NIGHT SIGNAL · FM 82.4 · SHIBUYA SCRAMBLE · CITY POP GUIDE · 渋谷 NIGHT SIGNAL · FM 82.4 ·</div>
       </div>
     </section>
 
@@ -96,17 +106,17 @@
       </div>
 
       <div class="concept-grid">
-        <article data-reveal>
+        <article data-index="01" data-reveal>
           <p class="concept-mark"><b>MA</b><span lang="ja">間</span></p>
           <h3 data-i18n="maTitle">Ma — deixar espaço</h3>
           <p data-i18n="maText">Nem toda área precisa ser preenchida. O vazio ajuda a separar ideias.</p>
         </article>
-        <article data-reveal>
+        <article data-index="02" data-reveal>
           <p class="concept-mark"><b>SHIBUI</b><span lang="ja">渋い</span></p>
           <h3 data-i18n="shibuiTitle">Shibui — evitar excesso</h3>
           <p data-i18n="shibuiText">Cor e movimento aparecem quando têm uma função, não para disputar atenção.</p>
         </article>
-        <article data-reveal>
+        <article data-index="03" data-reveal>
           <p class="concept-mark"><b>ASYMMETRY</b><span lang="ja">非対称</span></p>
           <h3 data-i18n="asymmetryTitle">Assimetria com equilíbrio</h3>
           <p data-i18n="asymmetryText">Os blocos não são espelhados, mas mantêm ritmo e proporção.</p>
@@ -114,25 +124,55 @@
       </div>
     </section>
 
-    <section id="neon" class="section section--bordered" aria-labelledby="neon-title">
+    <section id="shibuya" class="section section--bordered section--shibuya" aria-labelledby="shibuya-title">
       <header class="section-heading" data-reveal>
         <p class="section-number">02</p>
         <div>
-          <p class="kicker" data-i18n="neonKicker">A imagem que veio junto</p>
-          <h2 id="neon-title" data-i18n="neonTitle">O neon é um atalho visual. Não é a definição do gênero.</h2>
+          <p class="kicker" data-i18n="shibuyaKicker">Vocabulário visual</p>
+          <h2 id="shibuya-title" data-i18n="shibuyaTitle">Shibuya como referência: densidade, direção e luz em camadas.</h2>
         </div>
       </header>
 
       <div class="neon-layout">
-        <div class="prose" data-reveal>
-          <p data-i18n="neonP1">Quando o city pop voltou a circular pela internet, luzes ciano e magenta viraram uma maneira rápida de dizer “cidade japonesa à noite”. O código funciona porque lembra placas, vitrines, bares, estações e reflexos no asfalto.</p>
-          <p data-i18n="neonP2">Só que os discos também falam de manhã, praia, chuva, trabalho, solidão e vida doméstica. Por isso o neon desta página fica nas bordas: aparece mais no modo noturno, mas não toma o lugar do texto nem das capas.</p>
+        <div class="prose shibuya-copy" data-reveal>
+          <p data-i18n="shibuyaP1">A identidade visual toma emprestados elementos reconhecíveis de Shibuya: placas verticais, informação sobreposta, códigos de estação e o ritmo diagonal do cruzamento.</p>
+          <p data-i18n="shibuyaP2">A referência não tenta reproduzir a cidade literalmente. Ela organiza a página como uma rua: áreas de respiro, sinais rápidos, vitrines densas e caminhos claros para o próximo bloco.</p>
         </div>
 
-        <div class="neon-signs" data-i18n-aria-label="neonSignsLabel" aria-label="Fragmentos visuais de uma cidade noturna">
-          <article class="neon-sign neon-sign--cyan" data-reveal><span lang="ja">終電</span><small data-i18n="neonLastTrain">último trem</small></article>
-          <article class="neon-sign neon-sign--pink" data-reveal><span>82.4</span><small>FM TOKYO</small></article>
-          <article class="neon-sign neon-sign--violet" data-reveal><span lang="ja">珈琲</span><small data-i18n="neonCoffee">café aberto</small></article>
+        <div class="neon-signs" data-i18n-aria-label="shibuyaSignsLabel" aria-label="Fragmentos visuais inspirados em Shibuya">
+          <article class="neon-sign neon-sign--cyan" data-reveal><span lang="ja">渋谷</span><small data-i18n="shibuyaStation">estação · JY20</small></article>
+          <article class="neon-sign neon-sign--pink" data-reveal><span>109</span><small>SCRAMBLE / NIGHT</small></article>
+          <article class="neon-sign neon-sign--violet" data-reveal><span lang="ja">センター街</span><small data-i18n="shibuyaCenter">center-gai</small></article>
+        </div>
+      </div>
+
+      <div class="shibuya-reference">
+        <div class="shibuya-map" data-reveal data-i18n-aria-label="shibuyaMapLabel" aria-label="Diagrama abstrato inspirado no cruzamento de Shibuya">
+          <span class="map-road map-road--one" aria-hidden="true"></span>
+          <span class="map-road map-road--two" aria-hidden="true"></span>
+          <span class="map-road map-road--three" aria-hidden="true"></span>
+          <span class="map-node map-node--station"><b>JY20</b><small>SHIBUYA</small></span>
+          <span class="map-node map-node--crossing"><b>SCRAMBLE</b><small>35.6595° N</small></span>
+          <span class="map-node map-node--center"><b lang="ja">センター街</b><small>CENTER-GAI</small></span>
+          <span class="map-node map-node--route"><b>246</b><small>ROUTE</small></span>
+        </div>
+
+        <div class="shibuya-notes">
+          <article data-reveal>
+            <span>01 / FLOW</span>
+            <h3 data-i18n="shibuyaFlowTitle">Cruzamento como composição</h3>
+            <p data-i18n="shibuyaFlowText">Linhas diagonais e blocos deslocados criam movimento sem depender de uma fotografia de fundo.</p>
+          </article>
+          <article data-reveal>
+            <span>02 / TYPE</span>
+            <h3 data-i18n="shibuyaTypeTitle">Tipografia como sinal</h3>
+            <p data-i18n="shibuyaTypeText">Serifas editoriais convivem com códigos monoespaçados, números de estação e inscrições japonesas.</p>
+          </article>
+          <article data-reveal>
+            <span>03 / LIGHT</span>
+            <h3 data-i18n="shibuyaLightTitle">Luz com hierarquia</h3>
+            <p data-i18n="shibuyaLightText">Ciano, rosa e violeta marcam rotas e estados; o conteúdo principal continua legível em primeiro plano.</p>
+          </article>
         </div>
       </div>
     </section>
@@ -268,6 +308,7 @@
   <footer class="site-footer">
     <div><p data-i18n="footerProject">Projeto editorial e desenvolvimento</p><b>Lucas Rodrigues</b></div>
     <div><p data-i18n="footerSources">Fontes consultadas</p><a href="https://www.tatsuro.co.jp/discography/" target="_blank" rel="noopener noreferrer">Tatsuro Yamashita</a><a href="https://www.mariyat.co.jp/discography/album/album_all.html" target="_blank" rel="noopener noreferrer">Mariya Takeuchi</a><a href="https://www.forlife.co.jp/disco/flcf4243/" target="_blank" rel="noopener noreferrer">Anri — Timely!!</a></div>
+    <div><p data-i18n="footerVisual">Referências visuais</p><a href="https://www.tokyoupdates.metro.tokyo.lg.jp/en/post-229/" target="_blank" rel="noopener noreferrer">Tokyo Updates — Japanese Signage</a><a href="https://www.ntticc.or.jp/en/archive/works/urbanized-typeface-shibuya08-09/" target="_blank" rel="noopener noreferrer">Urbanized Typeface: Shibuya08-09</a></div>
     <div><p data-i18n="footerFormat">Formato</p><span>HTML · CSS · JavaScript</span><span>AVIF + WebP</span><span data-i18n="footerStatic">CloudFront com origem S3 privada</span></div>
   </footer>
 </body>

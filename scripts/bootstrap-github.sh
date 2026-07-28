@@ -6,6 +6,7 @@ SITE_STACK_NAME="${SITE_STACK_NAME:-city-pop-guide}"
 OIDC_STACK_NAME="${OIDC_STACK_NAME:-${SITE_STACK_NAME}-github}"
 AWS_REGION="${AWS_REGION:-sa-east-1}"
 GITHUB_BRANCH="${GITHUB_BRANCH:-main}"
+GITHUB_ENVIRONMENT="${GITHUB_ENVIRONMENT:-production}"
 ROLE_NAME="${ROLE_NAME:-city-pop-github-deploy}"
 EXISTING_OIDC_PROVIDER_ARN="${EXISTING_OIDC_PROVIDER_ARN:-}"
 CONFIGURE_GITHUB_VARIABLES="${CONFIGURE_GITHUB_VARIABLES:-false}"
@@ -20,12 +21,13 @@ Optional environment variables:
   SITE_STACK_NAME=city-pop-guide
   OIDC_STACK_NAME=city-pop-guide-github
   GITHUB_BRANCH=main
+  GITHUB_ENVIRONMENT=production
   ROLE_NAME=city-pop-github-deploy
   EXISTING_OIDC_PROVIDER_ARN=arn:aws:iam::<account>:oidc-provider/token.actions.githubusercontent.com
   CONFIGURE_GITHUB_VARIABLES=true
 
 Exact OIDC subject override:
-  GITHUB_OIDC_SUBJECT="repo:owner@ORG_ID/repository@REPO_ID:ref:refs/heads/main"
+  GITHUB_OIDC_SUBJECT="repo:owner@ORG_ID/repository@REPO_ID:environment:production"
 EOF
 }
 
@@ -60,6 +62,7 @@ read_site_output() {
 
 SITE_BUCKET_NAME="$(read_site_output BucketName)"
 DISTRIBUTION_ID="$(read_site_output DistributionId)"
+SITE_URL="$(read_site_output WebsiteUrl)"
 
 [[ -n "$SITE_BUCKET_NAME" && "$SITE_BUCKET_NAME" != "None" ]] || {
   echo "Erro: BucketName não encontrado na stack $SITE_STACK_NAME." >&2
@@ -89,21 +92,21 @@ resolve_github_subject() {
       )"
 
       if [[ -n "$owner_id" && -n "$repository_id" ]]; then
-        printf 'repo:%s@%s/%s@%s:ref:refs/heads/%s' \
+        printf 'repo:%s@%s/%s@%s:environment:%s' \
           "$OWNER" \
           "$owner_id" \
           "$REPOSITORY" \
           "$repository_id" \
-          "$GITHUB_BRANCH"
+          "$GITHUB_ENVIRONMENT"
         return
       fi
     fi
   fi
 
-  printf 'repo:%s/%s:ref:refs/heads/%s' \
+  printf 'repo:%s/%s:environment:%s' \
     "$OWNER" \
     "$REPOSITORY" \
-    "$GITHUB_BRANCH"
+    "$GITHUB_ENVIRONMENT"
 }
 
 GITHUB_SUBJECT="$(resolve_github_subject)"
@@ -154,6 +157,12 @@ configure_repository_variables() {
     --repo "$REPOSITORY_SLUG" \
     --body "$DISTRIBUTION_ID"
 
+  if [[ -n "$SITE_URL" && "$SITE_URL" != "None" ]]; then
+    gh variable set SITE_URL \
+      --repo "$REPOSITORY_SLUG" \
+      --body "$SITE_URL"
+  fi
+
   gh api \
     --method PUT \
     "repos/${REPOSITORY_SLUG}/environments/production" \
@@ -169,6 +178,7 @@ GitHub repository variables:
   AWS_ROLE_ARN=${ROLE_ARN}
   SITE_BUCKET_NAME=${SITE_BUCKET_NAME}
   CLOUDFRONT_DISTRIBUTION_ID=${DISTRIBUTION_ID}
+  SITE_URL=${SITE_URL}
 
 OIDC subject:
   ${GITHUB_SUBJECT}
