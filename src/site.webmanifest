@@ -1,0 +1,19 @@
+{
+  "name": "City Pop — guia essencial",
+  "short_name": "City Pop",
+  "description": "Guia bilíngue e minimalista sobre city pop.",
+  "lang": "pt-BR",
+  "start_url": "./",
+  "scope": "./",
+  "display": "standalone",
+  "background_color": "#f7f4ec",
+  "theme_color": "#f7f4ec",
+  "icons": [
+    {
+      "src": "assets/images/favicon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any"
+    }
+  ]
+}

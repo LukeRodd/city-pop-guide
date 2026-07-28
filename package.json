@@ -1,0 +1,17 @@
+{
+  "name": "city-pop-guide",
+  "version": "2.1.0",
+  "private": true,
+  "type": "module",
+  "engines": {
+    "node": ">=20"
+  },
+  "scripts": {
+    "validate": "node scripts/validate.mjs",
+    "build": "node scripts/build.mjs",
+    "check": "npm run validate && npm run validate:github && npm run test:theme && npm run build",
+    "serve": "node scripts/serve.mjs",
+    "test:theme": "node scripts/test-theme.mjs",
+    "validate:github": "node scripts/validate-github.mjs"
+  }
+}

@@ -1,0 +1,121 @@
+name: Deploy production
+
+on:
+  push:
+    branches:
+      - main
+    paths:
+      - "src/**"
+      - "scripts/build.mjs"
+      - "scripts/validate.mjs"
+      - "scripts/test-theme.mjs"
+      - "package.json"
+      - ".github/workflows/deploy.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  id-token: write
+
+concurrency:
+  group: production
+  cancel-in-progress: false
+
+env:
+  AWS_REGION: ${{ vars.AWS_REGION }}
+  AWS_ROLE_ARN: ${{ vars.AWS_ROLE_ARN }}
+  SITE_BUCKET_NAME: ${{ vars.SITE_BUCKET_NAME }}
+  CLOUDFRONT_DISTRIBUTION_ID: ${{ vars.CLOUDFRONT_DISTRIBUTION_ID }}
+
+jobs:
+  deploy:
+    name: Build and deploy
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    environment: production
+
+    steps:
+      - name: Validate repository configuration
+        shell: bash
+        run: |
+          set -Eeuo pipefail
+          : "${AWS_REGION:?Set the repository variable AWS_REGION}"
+          : "${AWS_ROLE_ARN:?Set the repository variable AWS_ROLE_ARN}"
+          : "${SITE_BUCKET_NAME:?Set the repository variable SITE_BUCKET_NAME}"
+          : "${CLOUDFRONT_DISTRIBUTION_ID:?Set CLOUDFRONT_DISTRIBUTION_ID}"
+
+      - name: Checkout repository
+        uses: actions/checkout@v7.0.1
+        with:
+          persist-credentials: false
+
+      - name: Configure Node.js
+        uses: actions/setup-node@v7.0.0
+        with:
+          node-version: "20"
+          package-manager-cache: false
+
+      - name: Validate and build
+        run: npm run check
+
+      - name: Configure temporary AWS credentials
+        uses: aws-actions/configure-aws-credentials@v6.2.3
+        with:
+          aws-region: ${{ env.AWS_REGION }}
+          role-to-assume: ${{ env.AWS_ROLE_ARN }}
+          role-session-name: github-${{ github.run_id }}
+          mask-aws-account-id: true
+          unset-current-credentials: true
+
+      - name: Verify AWS identity
+        run: aws sts get-caller-identity
+
+      - name: Upload HTML and metadata
+        shell: bash
+        run: |
+          set -Eeuo pipefail
+
+          aws s3 sync dist "s3://${SITE_BUCKET_NAME}" \
+            --delete \
+            --exclude "assets/*" \
+            --cache-control "no-cache,no-store,must-revalidate" \
+            --only-show-errors
+
+      - name: Upload immutable assets
+        shell: bash
+        run: |
+          set -Eeuo pipefail
+
+          aws s3 sync dist/assets "s3://${SITE_BUCKET_NAME}/assets" \
+            --delete \
+            --cache-control "public,max-age=31536000,immutable" \
+            --only-show-errors
+
+      - name: Invalidate CloudFront
+        shell: bash
+        run: |
+          set -Eeuo pipefail
+
+          INVALIDATION_ID="$(
+            aws cloudfront create-invalidation \
+              --distribution-id "${CLOUDFRONT_DISTRIBUTION_ID}" \
+              --paths "/*" \
+              --query "Invalidation.Id" \
+              --output text
+          )"
+
+          aws cloudfront wait invalidation-completed \
+            --distribution-id "${CLOUDFRONT_DISTRIBUTION_ID}" \
+            --id "${INVALIDATION_ID}"
+
+      - name: Deployment summary
+        shell: bash
+        run: |
+          {
+            echo "## Production deployment"
+            echo
+            echo "- Commit: \`${GITHUB_SHA}\`"
+            echo "- Bucket: \`${SITE_BUCKET_NAME}\`"
+            echo "- Distribution: \`${CLOUDFRONT_DISTRIBUTION_ID}\`"
+            echo "- Region: \`${AWS_REGION}\`"
+          } >> "${GITHUB_STEP_SUMMARY}"
